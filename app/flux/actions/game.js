@@ -2,7 +2,8 @@ class GameActions {
   constructor() {
     this.generateActions(
       'initialize',
-      'setScore'
+      'setScore',
+      'reduceLives'
     );
   }
 }

@@ -21,6 +21,10 @@ class Birdsmash extends Component {
     i18n: PropTypes.func.isRequired
   }
 
+  static propTypes = {
+    game: PropTypes.object.isRequired
+  }
+
   componentWillMount() {
     const { flux, i18n } = this.context;
 
@@ -182,6 +186,11 @@ class Birdsmash extends Component {
   }
 
   update = () => {
+    const { flux } = this.context;
+    const { game } = this.props;
+
+    if (game.isPaused) return false;
+
     const delta = this.clock.getDelta();
     // update animation of the flamingo
     for (let i = 0; i < this.mixers.length; i++) {
@@ -197,9 +206,11 @@ class Birdsmash extends Component {
       } else if (this.trees[i].position.z < 45 && this.trees[i].position.z > -20) {
         // check for collision
         if (Math.abs(this.Flamingo.group.position.x - this.trees[i].position.x) < 34) {
-          // game OVER!
-          this.trees[i].rotation.y = 1;
+          // COLLIDED!
           debug('dev')('COLLISION DETECTED!');
+          this.scene.remove(this.trees[i]);
+          this.trees.splice(i, 1);
+          flux.getActions('game').reduceLives();
         }
       }
     }
@@ -210,6 +221,8 @@ class Birdsmash extends Component {
       this.ground.position.z = 0;
       const bonusTrees = this.randomize(0, 3);
       let howManyTrees = 3 + bonusTrees;
+      // update game score
+      flux.getActions('game').setScore(howManyTrees);
       while (howManyTrees > 0) {
         this._createTree();
         howManyTrees--;

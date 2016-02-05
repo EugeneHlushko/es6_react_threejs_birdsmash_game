@@ -3,6 +3,7 @@ import connect from 'connect-alt';
 import { Link } from 'react-router';
 
 import LangPicker from 'components/shared/lang-picker';
+import GameStats from 'components/shared/game-stats';
 
 if (process.env.BROWSER) require('styles/header.scss');
 
@@ -36,6 +37,8 @@ class Header extends Component {
 
     return (
       <header className='app--header'>
+
+        <GameStats />
 
         {/* Links in the navbar */}
         <ul className='app--navbar text-center reset-list un-select'>

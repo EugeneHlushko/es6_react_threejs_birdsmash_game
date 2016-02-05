@@ -1,0 +1,11 @@
+.gamestats {
+  line-height: 52px;
+  vertical-align: middle;
+  display: inline-block;
+  font-size: 17px;
+  float: left;
+
+  .score {
+    margin: 0px 10px;
+  }
+}
