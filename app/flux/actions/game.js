@@ -1,13 +1,9 @@
 class GameActions {
-
   constructor() {
     this.generateActions(
-      'initialize'
+      'initialize',
+      'setScore'
     );
-  }
-
-  initialize() {
-
   }
 }
 

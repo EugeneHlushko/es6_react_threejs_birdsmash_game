@@ -1,5 +1,6 @@
 import debug from 'debug';
 import React, { Component, PropTypes } from 'react';
+import connect from 'connect-alt';
 import THREE from 'three';
 import KeyboardState from 'helpers/keyboardstate';
 
@@ -12,7 +13,8 @@ import Ground from 'meshes/homepagegl/ground';
 import Flamingo from 'meshes/homepagegl/flamingo';
 import Tree from 'meshes/homepagegl/tree';
 
-class Homepagegl extends Component {
+@connect(({ game }) => ({ game }))
+class Birdsmash extends Component {
 
   static contextTypes = {
     flux: PropTypes.object.isRequired,
@@ -21,6 +23,9 @@ class Homepagegl extends Component {
 
   componentWillMount() {
     const { flux, i18n } = this.context;
+
+    // initialize new game
+    flux.getActions('game').initialize();
 
     return flux.getActions('helmet').update({
       title: i18n('homepage.page-title'),
@@ -69,6 +74,9 @@ class Homepagegl extends Component {
     this.keyboard = new KeyboardState();
     this.loader = new THREE.TextureLoader();
     this.tree = new Tree();
+
+    debug('dev')('test');
+    debug('dev')(this.props);
 
     // init stuff
     //this.initControls();
@@ -254,4 +262,4 @@ class Homepagegl extends Component {
 
 }
 
-export default Homepagegl;
+export default Birdsmash;
