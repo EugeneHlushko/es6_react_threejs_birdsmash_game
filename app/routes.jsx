@@ -12,8 +12,8 @@ export default function (flux) { /* eslint react/display-name: 0 */
         component: require('./components/homepage')
       }) }
       { generateRoute({
-        paths: [ '/users', '/ru/users' ],
-        component: require('./components/users')
+        paths: [ '/play', '/ru/play' ],
+        component: require('./components/birdsmash')
       }) }
       { generateRoute({
         paths: [ '/account', '/ru/account' ],
@@ -23,10 +23,6 @@ export default function (flux) { /* eslint react/display-name: 0 */
       { generateRoute({
         paths: [ '/guides', '/ru/guides' ],
         component: require('./components/guides')
-      }) }
-      { generateRoute({
-        paths: [ '/profile/:seed', '/ru/profile/:seed' ],
-        component: require('./components/profile')
       }) }
       { generateRoute({
         paths: [ '/login', '/ru/login' ],

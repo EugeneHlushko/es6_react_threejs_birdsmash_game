@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import cx from 'classnames';
 
+if (process.env.BROWSER) require('styles/lang-picker.scss');
+
 class LangPicker extends Component {
 
   static propTypes = {

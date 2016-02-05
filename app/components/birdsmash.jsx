@@ -2,9 +2,15 @@ import debug from 'debug';
 import React, { Component, PropTypes } from 'react';
 import THREE from 'three';
 import KeyboardState from 'helpers/keyboardstate';
-import FlamingoModel from 'models/flamingo';
+
+// Shaders
 import fragmentShader from 'shaders/homepagefrag';
 import vertexShader from 'shaders/homepagevert';
+
+// Meshes
+import Ground from 'meshes/homepagegl/ground';
+import Flamingo from 'meshes/homepagegl/flamingo';
+import Tree from 'meshes/homepagegl/tree';
 
 class Homepagegl extends Component {
 
@@ -20,6 +26,12 @@ class Homepagegl extends Component {
       title: i18n('homepage.page-title'),
       description: i18n('homepage.page-description')
     });
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.animationFrame);
+    this.scene = null;
+    this.renderer = null;
   }
 
   componentDidMount() {
@@ -45,8 +57,7 @@ class Homepagegl extends Component {
     this.scene.fog.color.setHSL(0.6, 0, 1);
     this.mixers = [];
     this.trees = [];
-    this.collidable = [];
-    this.spawnerInterval = null;
+    this.animationFrame = null;
     this.cfg = {
       speed: 1000,
       maxTree: 10,
@@ -57,6 +68,7 @@ class Homepagegl extends Component {
     };
     this.keyboard = new KeyboardState();
     this.loader = new THREE.TextureLoader();
+    this.tree = new Tree();
 
     // init stuff
     //this.initControls();
@@ -67,17 +79,6 @@ class Homepagegl extends Component {
     this.initRenderer();
 
     this.animate();
-
-    // start spawning trees
-    this.spawnerInterval = setInterval(() => {
-      this._createTree();
-      this._createTree();
-      this._createTree();
-      if (this.randomize(0, 1) === 1) {
-        this._createTree();
-        this._createTree();
-      }
-    }, 900);
 
     debug('dev')('Setup complete!');
   }
@@ -117,25 +118,8 @@ class Homepagegl extends Component {
 
   // GROUND
   initGround() {
-    const groundGeo = new THREE.PlaneBufferGeometry(10000, 10000);
-    //let groundMat = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0x050505 });
-    let grassPicture = require('images/textures/ground/grassy_01.jpg');
-    grassPicture = grassPicture.substring(grassPicture.indexOf('/assets/'));
-
-    // load a resource
-    /*eslint-disable */
-    const floorTexture = new THREE.ImageUtils.loadTexture(grassPicture);
-    /*eslint-enable */
-    floorTexture.wrapS = THREE.RepeatWrapping;
-    floorTexture.wrapT = THREE.RepeatWrapping;
-    floorTexture.repeat.set(10, 10);
-    const floorMaterial = new THREE.MeshBasicMaterial({ map: floorTexture, side: THREE.DoubleSide });
-    //groundMat.color.setHSL(0.095, 1, 0.75);
-    this.ground = new THREE.Mesh(groundGeo, floorMaterial);
-    this.ground.rotation.x = -Math.PI / 2;
-    this.ground.position.y = -30;
+    this.ground = new Ground().ground;
     this.scene.add(this.ground);
-    this.ground.receiveShadow = true;
   }
 
   // sky
@@ -160,38 +144,12 @@ class Homepagegl extends Component {
   }
 
   initModel = () => {
-    this.flamingoGroup = new THREE.Group();
-    this.JSONloader = new THREE.JSONLoader();
-    this.Flamingo = this.JSONloader.parse(FlamingoModel);
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xffffff,
-      specular: 0xffffff,
-      shininess: 20,
-      morphTargets: true,
-      vertexColors: THREE.FaceColors,
-      shading: THREE.FlatShading });
+    this.Flamingo = new Flamingo();
+    this.scene.add(this.Flamingo.group);
 
-    this.FlamingoMesh = new THREE.Mesh(this.Flamingo.geometry, material);
-    const s = 0.35;
-    this.FlamingoMesh.scale.set(s, s, s);
-    this.FlamingoMesh.position.y = 5;
-    this.FlamingoMesh.position.z = 5;
-    this.FlamingoMesh.rotation.y = -3.15;
-    //this.FlamingoMesh.rotation.z = -1;
-    this.FlamingoMesh.castShadow = true;
-    this.FlamingoMesh.receiveShadow = true;
-
-    const flamingoCube = new THREE.BoxGeometry(40, 40, 40);
-    const cubeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    this.FlamingoCube = new THREE.Mesh(flamingoCube, cubeMaterial);
-    this.FlamingoCube.position.y = -20;
-    this.flamingoGroup.add(this.FlamingoMesh);
-    this.flamingoGroup.add(this.FlamingoCube);
-    this.scene.add(this.flamingoGroup);
-
-    const mixer = new THREE.AnimationMixer(this.FlamingoMesh);
+    const mixer = new THREE.AnimationMixer(this.Flamingo.mesh);
     mixer.addAction(
-      new THREE.AnimationAction(this.Flamingo.geometry.animations[0]).warpToDuration(1)
+      new THREE.AnimationAction(this.Flamingo.model.geometry.animations[0]).warpToDuration(1)
     );
     this.mixers.push(mixer);
   }
@@ -203,7 +161,6 @@ class Homepagegl extends Component {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    debug('dev')(this);
     this.refs.canvasHolder.appendChild(this.renderer.domElement);
     this.renderer.gammaInput = true;
     this.renderer.gammaOutput = true;
@@ -212,9 +169,8 @@ class Homepagegl extends Component {
   }
 
   animate = () => {
-    requestAnimationFrame(this.animate);
+    this.animationFrame = requestAnimationFrame(this.animate);
     this.update();
-    //stats.update();
   }
 
   update = () => {
@@ -223,61 +179,58 @@ class Homepagegl extends Component {
     for (let i = 0; i < this.mixers.length; i++) {
       this.mixers[i].update(delta);
     }
-    // famove trees
+    // move trees
     for (let i = 0; i < this.trees.length; i++) {
       this.trees[i].position.z += (delta * this.cfg.speed);
       if (this.trees[i].position.z > this.cfg.destroyLine) {
         // remove the tree and its references
         this.scene.remove(this.trees[i]);
-        this.collidable.splice(i, 1);
         this.trees.splice(i, 1);
+      } else if (this.trees[i].position.z < 45 && this.trees[i].position.z > -20) {
+        // check for collision
+        if (Math.abs(this.Flamingo.group.position.x - this.trees[i].position.x) < 34) {
+          // game OVER!
+          this.trees[i].rotation.y = 1;
+          debug('dev')('COLLISION DETECTED!');
+        }
       }
     }
 
-    // ground move
+    // ground move && spawn trees
     this.ground.position.z += (delta * this.cfg.speed);
-    if (this.ground.position.z > 1400) {
+    if (this.ground.position.z > 1200) {
       this.ground.position.z = 0;
+      const bonusTrees = this.randomize(0, 3);
+      let howManyTrees = 3 + bonusTrees;
+      while (howManyTrees > 0) {
+        this._createTree();
+        howManyTrees--;
+      }
     }
 
     // controls of the player
     if (this.keyboard.pressed('left')) {
-      if (this.flamingoGroup.position.x > this.cfg.limitLeft) {
-        this.flamingoGroup.position.x -= 1.5;
+      if (this.Flamingo.group.position.x > this.cfg.limitLeft) {
+        this.Flamingo.group.position.x -= 1.5;
       }
-      if (this.flamingoGroup.rotation.z < 0.24) {
-        this.flamingoGroup.rotation.z += 0.01;
+      if (this.Flamingo.group.rotation.z < 0.24) {
+        this.Flamingo.group.rotation.z += 0.01;
       }
     }
     if (this.keyboard.pressed('right')) {
-      if (this.flamingoGroup.position.x < this.cfg.limitRight) {
-        this.flamingoGroup.position.x += 1.5;
+      if (this.Flamingo.group.position.x < this.cfg.limitRight) {
+        this.Flamingo.group.position.x += 1.5;
       }
-      if (this.flamingoGroup.rotation.z > -0.24) {
-        this.flamingoGroup.rotation.z -= 0.01;
+      if (this.Flamingo.group.rotation.z > -0.24) {
+        this.Flamingo.group.rotation.z -= 0.01;
       }
     }
     // rotation back when keys are released
     if (!this.keyboard.pressed('left') && !this.keyboard.pressed('right')) {
-      if (this.flamingoGroup.rotation.z < 0) {
-        this.flamingoGroup.rotation.z += 0.01;
-      } else if (this.flamingoGroup.rotation.z > 0) {
-        this.flamingoGroup.rotation.z -= 0.01;
-      }
-    }
-
-    // collision detection
-    const originPoint = this.FlamingoCube.clone();
-
-    for (let vertexIndex = 0; vertexIndex < this.FlamingoCube.geometry.vertices.length; vertexIndex++) {
-      const localVertex = this.FlamingoCube.geometry.vertices[vertexIndex].clone();
-      const globalVertex = localVertex.applyMatrix4(this.FlamingoCube.matrix);
-      const directionVector = globalVertex.sub(this.FlamingoCube.position);
-
-      const ray = new THREE.Raycaster(originPoint, directionVector.clone().normalize());
-      const collisionResults = ray.intersectObjects(this.collidable);
-      if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
-        debug('dev')('COLLISION!!!!!');
+      if (this.Flamingo.group.rotation.z < 0) {
+        this.Flamingo.group.rotation.z += 0.01;
+      } else if (this.Flamingo.group.rotation.z > 0) {
+        this.Flamingo.group.rotation.z -= 0.01;
       }
     }
 
@@ -294,47 +247,7 @@ class Homepagegl extends Component {
   // this will spawn a tree into the scene at random horizontal position for player to avoid
   // tree gets destroyed after it leaves the scene
   _createTree = () => {
-    const temporaryTree = new THREE.Group();
-    const geoHeight = 10;
-    const geometry = new THREE.CylinderGeometry(
-      4, // radius top
-      4, // radius bottom
-      geoHeight, // height
-      8 // radius segments
-    );
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x483000,
-      specular: 0x483000,
-      shininess: 20,
-      morphTargets: true,
-      vertexColors: THREE.FaceColors,
-      shading: THREE.FlatShading });
-    const cylinder = new THREE.Mesh(geometry, material);
-    cylinder.position.y = -(30 - geoHeight / 2);
-    temporaryTree.add(cylinder);
-
-    const greenHeight = 60;
-    const greenGeometry = new THREE.CylinderGeometry(
-      0, // radius top
-      30, // radius bottom
-      greenHeight, // height
-      32 // radius segments
-    );
-    const greenMaterial = new THREE.MeshPhongMaterial({
-      color: 0x3BA200,
-      specular: 0x3BA200,
-      shininess: 20,
-      morphTargets: true,
-      vertexColors: THREE.FaceColors,
-      shading: THREE.FlatShading });
-    const green = new THREE.Mesh(greenGeometry, greenMaterial);
-    green.position.y = 10;
-    this.collidable.push(green);
-    temporaryTree.add(green);
-    // now randomize x position
-    temporaryTree.position.z = this.cfg.spawnFar;
-    temporaryTree.position.x = this.randomize(-500, 500);
-
+    const temporaryTree = this.tree.createTree(this.cfg.spawnFar, this.randomize(-500, 500));
     this.trees.push(temporaryTree);
     this.scene.add(temporaryTree);
   }

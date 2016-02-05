@@ -4,8 +4,8 @@ class HelmetStore {
     this.bindActions(this.alt.getActions('helmet'));
 
     this.title = '';
-    this.titleBase = 'Universal JS app - ';
-    this.description = 'Meta description is very important for SEO';
+    this.titleBase = 'Smashing bird - ';
+    this.description = 'Smash the bird against trees! Or dont, i dont care.';
     this.statusCode = 200;
   }
 

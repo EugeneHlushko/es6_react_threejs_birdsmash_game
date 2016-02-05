@@ -55,7 +55,7 @@ export default {
           exclude: /node_modules\/(?!font-awesome)/
         },
         {
-          test: /\.css$/,
+          test: /\.s?css$/,
           loader: 'style!css?sourceMap!postcss',
           exclude: /node_modules/
         }

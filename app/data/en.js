@@ -14,7 +14,10 @@ export default {
       'page-title': 'Homepage',
       'page-description': 'Meta description of the HOMEPAGE',
       'coming-soon': 'Very cool universal(isomorphic) homepage',
-      pageh1: 'Homepage'
+      play: {
+        title: 'Play',
+        url: '/play'
+      }
     },
     guides: {
       'page-title': 'Guides',

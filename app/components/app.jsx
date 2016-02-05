@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import Header from 'components/header';
 
 if (process.env.BROWSER) require('styles/app.css');
 
@@ -29,6 +30,7 @@ class App extends Component {
 
     return (
       <div>
+        <Header />
         { children }
       </div>
     );

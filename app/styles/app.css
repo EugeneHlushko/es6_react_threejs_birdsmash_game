@@ -5,9 +5,6 @@
 @import './_variables';
 
 @import './footer';
-@import './header';
-@import './lang-picker';
-@import './spinner';
 @import './users';
 
 body {
@@ -17,7 +14,7 @@ body {
   width: 100%;
 }
 
-.reset-list {
+ul {
   margin: 0;
   padding: 0;
   list-style-type: none;

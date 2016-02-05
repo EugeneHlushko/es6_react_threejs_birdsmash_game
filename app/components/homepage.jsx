@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
-import Homepagegl from './homepagegl';
+import { Link } from 'react-router';
+
+if (process.env.BROWSER) require('styles/homepage.css');
 
 class Homepage extends Component {
 
@@ -18,10 +20,15 @@ class Homepage extends Component {
   }
 
   render() {
-    //const { i18n } = this.context;
+    const { i18n } = this.context;
     return (
-      <div>
-        <Homepagegl />
+      <div className='homepage'>
+        <h1>Birdsmash - a silly name for a silly game!</h1>
+        <div className='button'>
+          <Link to={ i18n('homepage.play.url') }>
+            { i18n('homepage.play.title') }
+          </Link>
+        </div>
       </div>
     );
   }

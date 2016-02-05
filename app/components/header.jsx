@@ -1,28 +1,16 @@
-import debug from 'debug';
 import React, { Component, PropTypes } from 'react';
 import connect from 'connect-alt';
-import { Link, RouteContext } from 'react-router';
+import { Link } from 'react-router';
 
-import imageResolver from 'utils/image-resolver';
-import Spinner from 'components/shared/spinner';
 import LangPicker from 'components/shared/lang-picker';
 
-// Load styles for the header
-// and load the `react-logo.png` image
-// for the `<img src='' />` element
-let reactLogo;
-if (process.env.BROWSER) {
-  reactLogo = require('images/react-logo.png');
-} else {
-  reactLogo = imageResolver('images/react-logo.png');
-}
+if (process.env.BROWSER) require('styles/header.scss');
 
-@connect(({ requests: { inProgress }, session: { session } }) =>
-  ({ inProgress, session }))
+@connect(({ session: { session } }) =>
+  ({ session }))
 class Header extends Component {
 
   static propTypes = {
-    inProgress: PropTypes.bool,
     session: PropTypes.object
   }
 
@@ -34,12 +22,6 @@ class Header extends Component {
 
   handleLocaleChange(locale) {
     const { flux } = this.context;
-    debug('dev')(
-      'the context is',
-      this.context,
-      RouteContext
-    );
-
     flux.getActions('locale').switchLocale({ locale });
   }
 
@@ -49,34 +31,17 @@ class Header extends Component {
   }
 
   render() {
-    const { inProgress, session } = this.props;
+    const { session } = this.props;
     const { locales: [ activeLocale ], i18n } = this.context;
 
     return (
       <header className='app--header'>
-        {/* Spinner in the top right corner */}
-        <Spinner active={ inProgress } />
-
-        {/* LangPicker on the right side */}
-        <LangPicker
-          activeLocale={ activeLocale }
-          onChange={ ::this.handleLocaleChange } />
-
-        {/* React Logo in header */}
-        <Link to='/' className='app--logo'>
-          <img src={ reactLogo } alt='Nice image' />
-        </Link>
 
         {/* Links in the navbar */}
         <ul className='app--navbar text-center reset-list un-select'>
           <li>
-            <Link to={ i18n('routes.users') }>
-              { i18n('header.users') }
-            </Link>
-          </li>
-          <li>
-            <Link to={ i18n('routes.guides') }>
-              { i18n('header.guides') }
+            <Link to={ i18n('homepage.play.url') }>
+              { i18n('homepage.play.title') }
             </Link>
           </li>
           { session ?
@@ -99,6 +64,11 @@ class Header extends Component {
             </li>
           }
         </ul>
+
+        {/* LangPicker on the right side */}
+        <LangPicker
+          activeLocale={ activeLocale }
+          onChange={ ::this.handleLocaleChange } />
       </header>
     );
   }

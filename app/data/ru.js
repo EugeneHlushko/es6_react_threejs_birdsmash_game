@@ -14,7 +14,10 @@ export default {
       'page-title': 'Главная страница сайта',
       'page-description': 'Мета описание для ГЛАВНОЙ СТРАНИЦЫ САЙТА',
       'coming-soon': 'очень крутая страница!',
-      pageh1: 'ГЛАВНАЯ'
+      play: {
+        title: 'Играть',
+        url: '/ru/play'
+      }
     },
     guides: {
       'page-title': 'Руководство',
