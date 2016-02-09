@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import connect from 'connect-alt';
-import debug from 'debug';
-import OneScore from 'components/highscores/onescore';
+import Onescore from 'components/highscores/onescore';
+
+if (process.env.BROWSER) require('styles/highscores.scss');
 
 @connect(({ highscores }) => ({ highscores }))
 class Highscores extends Component {
@@ -15,13 +16,14 @@ class Highscores extends Component {
     highscores: PropTypes.object.isRequired
   }
 
-  render() {
-    const { i18n, flux } = this.context;
-    const { highscores } = this.props;
-
+  componentWillMount() {
+    const { flux } = this.context;
     flux.getActions('highscores').index();
+  }
 
-    debug('dev')('All highscores!', highscores);
+  render() {
+    const { i18n } = this.context;
+    const { highscores } = this.props;
 
     return (
       <div>
@@ -29,7 +31,7 @@ class Highscores extends Component {
           { i18n('highscores.heading') }
         </h1>
         { highscores.collection.map((item, key) => {
-          <OneScore items={ item } key={ key } />;
+          return <Onescore item={ item } key={ key } />;
         }) }
       </div>
     );

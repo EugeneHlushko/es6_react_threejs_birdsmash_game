@@ -1,6 +1,7 @@
 import { users } from './data.json';
 import nosql from 'nosql';
 import debug from 'debug';
+import url from 'url'
 
 // TODO: boilerplate function example remove later
 const simplifyUsers = (collection) => collection
@@ -22,6 +23,24 @@ export default function (router) {
             resolve(results);
           }
         });
+      });
+
+      ctx.body = JSON.stringify(promise);
+    }
+  );
+
+  router.get('/highscores/add',
+    async function (ctx) {
+      let promise = await new Promise((resolve, reject) => {
+        const db = nosql.load('./database/highscore.nosql');
+        const _query = url.parse(ctx.request.url, true).query;
+        debug('dev')('/highscores/add', _query);
+        if ( _query.score > 0 && _query.name.length > 1 ) {
+          db.insert({ name: _query.name, score: _query.score });
+          resolve({ success: 'Added score' });
+        } else {
+          resolve({ err: 'failed validation' });
+        }
       });
 
       ctx.body = JSON.stringify(promise);

@@ -39,7 +39,6 @@ class SessionStore {
       require('utils/router-history').replaceState(null, '/login');
     }
   }
-
 }
 
 export default SessionStore;

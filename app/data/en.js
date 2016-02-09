@@ -22,6 +22,7 @@ export default {
     },
     gameover: {
       'page-title': 'Game over!',
+      yourscore: 'Your score',
       url: '/gameover'
     },
     highscores: {

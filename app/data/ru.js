@@ -22,10 +22,11 @@ export default {
     },
     gameover: {
       'page-title': 'Игра окончена!',
+      yourscore: 'Ваш результат',
       url: '/ru/gameover'
     },
     highscores: {
-      heading: 'Top10 результатов'
+      heading: 'Топ 10 результатов'
     },
     guides: {
       'page-title': 'Руководство',

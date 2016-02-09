@@ -19,7 +19,7 @@ class GameStore {
   }
 
   onEnd() {
-    debug('dev')('initializing new game');
+    debug('dev')('Game is over, lets end it');
     this.gameOver = true;
     this.isPlaying = false;
   }

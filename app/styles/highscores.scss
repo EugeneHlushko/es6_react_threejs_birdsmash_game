@@ -1,0 +1,38 @@
+.hh-item {
+  display: flex;
+  flex-wrap: wrap;
+
+  &:after {
+    content:'';
+    display: table;
+    clear: both;
+  }
+
+  &:last-child {
+    .hh-item-name,
+    .hh-item-score {
+      border-bottom: 1px solid #000000;
+    }
+  }
+
+  &-name,
+  &-score {
+    padding: 2px 10px;
+    min-width: 33.33%;
+  }
+
+  &-name {
+    border: 1px solid #000000;
+    border-bottom: none;
+    border-right: none;
+    text-align: right;
+    flex-grow: 3;
+  }
+
+  &-score {
+    text-align: left;
+    border: 1px solid #000000;
+    border-bottom: none;
+    flex-grow: 1;
+  }
+}

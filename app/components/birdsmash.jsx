@@ -16,6 +16,7 @@ import Flamingo from 'meshes/homepagegl/flamingo';
 import Tree from 'meshes/homepagegl/tree';
 
 @connect(({ game }) => ({ game }))
+@connect(({ session: { session } }) => ({ session }))
 class Birdsmash extends Component {
 
   static contextTypes = {
@@ -24,7 +25,8 @@ class Birdsmash extends Component {
   }
 
   static propTypes = {
-    game: PropTypes.object.isRequired
+    game: PropTypes.object.isRequired,
+    session: PropTypes.object.isRequired
   }
 
   componentWillMount() {
@@ -32,6 +34,8 @@ class Birdsmash extends Component {
 
     // initialize new game
     flux.getActions('game').initialize();
+
+    debug('dev')(this);
 
     return flux.getActions('helmet').update({
       title: i18n('homepage.page-title'),
@@ -41,7 +45,10 @@ class Birdsmash extends Component {
 
   componentWillUnmount() {
     const { flux } = this.context;
+    const { game, session } = this.props;
+
     flux.getActions('game').end();
+    flux.getActions('highscores').add(game.score, session.username);
 
     cancelAnimationFrame(this.animationFrame);
     this.scene = null;
