@@ -13,7 +13,12 @@ export default function (flux) { /* eslint react/display-name: 0 */
       }) }
       { generateRoute({
         paths: [ '/play', '/ru/play' ],
-        component: require('./components/birdsmash')
+        component: require('./components/birdsmash'),
+        onEnter: isConnected(flux)
+      }) }
+      { generateRoute({
+        paths: [ '/gameover', '/ru/gameover' ],
+        component: require('./pages/game-over')
       }) }
       { generateRoute({
         paths: [ '/account', '/ru/account' ],

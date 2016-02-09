@@ -14,10 +14,18 @@ export default {
       'page-title': 'Главная страница сайта',
       'page-description': 'Мета описание для ГЛАВНОЙ СТРАНИЦЫ САЙТА',
       'coming-soon': 'очень крутая страница!',
+      h1: 'Birdsmash - дурацкое название дурацкой игры!',
       play: {
         title: 'Играть',
         url: '/ru/play'
       }
+    },
+    gameover: {
+      'page-title': 'Игра окончена!',
+      url: '/ru/gameover'
+    },
+    highscores: {
+      heading: 'Top10 результатов'
     },
     guides: {
       'page-title': 'Руководство',

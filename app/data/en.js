@@ -14,10 +14,18 @@ export default {
       'page-title': 'Homepage',
       'page-description': 'Meta description of the HOMEPAGE',
       'coming-soon': 'Very cool universal(isomorphic) homepage',
+      h1: 'Birdsmash - a silly name for silly game!',
       play: {
         title: 'Play',
         url: '/play'
       }
+    },
+    gameover: {
+      'page-title': 'Game over!',
+      url: '/gameover'
+    },
+    highscores: {
+      heading: 'Top10 high scores'
     },
     guides: {
       'page-title': 'Guides',

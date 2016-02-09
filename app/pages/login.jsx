@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 
+if (process.env.BROWSER) require('styles/login.scss');
+
 class LoginPage extends Component {
 
   static contextTypes = {
@@ -22,7 +24,7 @@ class LoginPage extends Component {
     const { i18n } = this.context;
 
     return (
-      <form onSubmit={ ::this.handleSubmit }>
+      <form className='loginForm' onSubmit={ ::this.handleSubmit }>
         <p className='alert alert-info'>{ i18n('login.help') }</p>
         <div className='form-group'>
           <label htmlFor='username'>

@@ -3,7 +3,8 @@ class GameActions {
     this.generateActions(
       'initialize',
       'setScore',
-      'reduceLives'
+      'reduceLives',
+      'end'
     );
   }
 }

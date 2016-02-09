@@ -1,7 +1,9 @@
 import debug from 'debug';
 import React, { Component, PropTypes } from 'react';
+import GameStats from 'components/shared/game-stats';
 import connect from 'connect-alt';
-import THREE from 'three';
+//import THREE from 'three';
+import THREE from 'helpers/GPUparticles';
 import KeyboardState from 'helpers/keyboardstate';
 
 // Shaders
@@ -38,6 +40,9 @@ class Birdsmash extends Component {
   }
 
   componentWillUnmount() {
+    const { flux } = this.context;
+    flux.getActions('game').end();
+
     cancelAnimationFrame(this.animationFrame);
     this.scene = null;
     this.renderer = null;
@@ -89,6 +94,33 @@ class Birdsmash extends Component {
     this.initSky();
     this.initModel();
     this.initRenderer();
+
+    this.particleSystem = new THREE.GPUParticleSystem({
+      maxParticles: 250000
+    });
+    this.scene.add(this.particleSystem);
+
+    // options passed during each spawned
+    this.particleOptions = {
+      position: new THREE.Vector3(),
+      positionRandomness: 25,
+      velocity: new THREE.Vector3(),
+      velocityRandomness: 100,
+      color: 0xff5300,
+      colorRandomness: 0.2,
+      turbulence: 5,
+      lifetime: 1,
+      size: 100,
+      sizeRandomness: 10
+    };
+
+    this.spawnerOptions = {
+      spawnRate: 15000,
+      horizontalSpeed: 1.5,
+      verticalSpeed: 1.33,
+      timeScale: 1
+    };
+    this.tick = 0;
 
     this.animate();
 
@@ -191,14 +223,29 @@ class Birdsmash extends Component {
 
     if (game.isPaused) return false;
 
+    if (game.gameOver) {
+      // redirect to game over screen
+      const history = require('utils/router-history');
+      const url = `/gameover`;
+      const [ , nextPath = url ] = [];
+      history.replaceState(null, nextPath);
+      return false;
+    }
+
     const delta = this.clock.getDelta();
+    this.tick += delta;
+
+    if (this.tick < 0) this.tick = 0;
+
+    this.particleSystem.update(this.tick);
+
     // update animation of the flamingo
     for (let i = 0; i < this.mixers.length; i++) {
       this.mixers[i].update(delta);
     }
     // move trees
     for (let i = 0; i < this.trees.length; i++) {
-      this.trees[i].position.z += (delta * this.cfg.speed);
+      this.trees[i].position.z += (delta * this.cfg.speed + (game.level * 2));
       if (this.trees[i].position.z > this.cfg.destroyLine) {
         // remove the tree and its references
         this.scene.remove(this.trees[i]);
@@ -210,13 +257,27 @@ class Birdsmash extends Component {
           debug('dev')('COLLISION DETECTED!');
           this.scene.remove(this.trees[i]);
           this.trees.splice(i, 1);
+          // reduce lives, if no more lives, game over;
           flux.getActions('game').reduceLives();
+
+          // make the firework
+          if (delta > 0) {
+            this.particleOptions.position.x = this.Flamingo.group.position.x;
+            this.particleOptions.position.y = this.Flamingo.group.position.y;
+            this.particleOptions.position.z = this.Flamingo.group.position.z;
+
+            for (let x = 0; x < this.spawnerOptions.spawnRate * delta; x++) {
+              // Yep, that's really it.	Spawning particles is super cheap, and once you spawn them, the rest of
+              // their lifecycle is handled entirely on the GPU, driven by a time uniform updated below
+              this.particleSystem.spawnParticle(this.particleOptions);
+            }
+          }
         }
       }
     }
 
     // ground move && spawn trees
-    this.ground.position.z += (delta * this.cfg.speed);
+    this.ground.position.z += (delta * this.cfg.speed + (game.level * 2));
     if (this.ground.position.z > 1200) {
       this.ground.position.z = 0;
       const bonusTrees = this.randomize(0, 3);
@@ -261,7 +322,9 @@ class Birdsmash extends Component {
   render() {
     //const { i18n } = this.context;
     return (
-      <div ref='canvasHolder' className='canvasHolder'></div>
+      <div ref='canvasHolder' className='canvasHolder'>
+        <GameStats />
+      </div>
       );
   }
 
