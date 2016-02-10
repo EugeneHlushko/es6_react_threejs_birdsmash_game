@@ -10,7 +10,6 @@ const simplifyUsers = (collection) => collection
 
 export default function (router) {
   // shows all highscores
-  // TODO: sort top 10
   router.get('/highscores',
     async function (ctx) {
       let promise = await new Promise((resolve, reject) => {
@@ -19,8 +18,10 @@ export default function (router) {
           if ( err ) {
             reject(err);
           } else {
-            debug('dev')('selected guys are', results);
-            resolve(results);
+            let top10 = results;
+            top10.sort((a,b) => { return b.score-a.score });
+            top10 = top10.slice(0,10);
+            resolve(top10);
           }
         });
       });
