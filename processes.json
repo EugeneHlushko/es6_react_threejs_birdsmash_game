@@ -1,7 +1,7 @@
 {
   "apps" : [
     {
-      "name": "jenkinsisostage",
+      "name": "birdsmashlive",
       "script": "./server/index.js",
       "instances": 1,
       "log_date_format": "YYYY-MM-DD HH:mm Z",

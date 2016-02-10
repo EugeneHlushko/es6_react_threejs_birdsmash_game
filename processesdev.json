@@ -14,7 +14,7 @@
       "env": {
         "NODE_ENV": "production",
         "DEBUG": "koa",
-        "PORT": 3011
+        "PORT": 3015
       },
       "node_args": "--max_old_space_size=300 --harmony"
     }
