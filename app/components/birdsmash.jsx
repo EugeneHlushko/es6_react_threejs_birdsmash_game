@@ -14,6 +14,7 @@ import vertexShader from 'shaders/homepagevert';
 import Ground from 'meshes/homepagegl/ground';
 import Flamingo from 'meshes/homepagegl/flamingo';
 import Tree from 'meshes/homepagegl/tree';
+import Pyramid from 'meshes/homepagegl/pyramid';
 
 @connect(({ game }) => ({ game }))
 @connect(({ session: { session } }) => ({ session }))
@@ -35,7 +36,7 @@ class Birdsmash extends Component {
     // initialize new game
     flux.getActions('game').initialize();
 
-    debug('dev')(this);
+    this.state = {};
 
     return flux.getActions('helmet').update({
       title: i18n('homepage.page-title'),
@@ -77,7 +78,7 @@ class Birdsmash extends Component {
     this.scene.fog = new THREE.Fog(0xffffff, 1, 5000);
     this.scene.fog.color.setHSL(0.6, 0, 1);
     this.mixers = [];
-    this.trees = [];
+    this.obstacles = [];
     this.animationFrame = null;
     this.cfg = {
       speed: 1000,
@@ -89,10 +90,12 @@ class Birdsmash extends Component {
     };
     this.keyboard = new KeyboardState();
     this.loader = new THREE.TextureLoader();
-    this.tree = new Tree();
-
-    debug('dev')('test');
-    debug('dev')(this.props);
+    // used to spawn obstacles
+    // changed with level change to new obstacles
+    this.state.spawner = new Tree();
+    //this.spawner = new Tree();
+    //this.spawner = new Pyramid();
+    debug('dev')(Tree);
 
     // init stuff
     //this.initControls();
@@ -139,7 +142,7 @@ class Birdsmash extends Component {
   }
 
   initLights() {
-    const d = 50;
+    const d = 150;
 
     this.hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.6);
     this.hemiLight.color.setHSL(0.6, 1, 0.6);
@@ -150,7 +153,8 @@ class Birdsmash extends Component {
     // directional light
     this.dirLight = new THREE.DirectionalLight(0xffffff, 1);
     this.dirLight.color.setHSL(0.1, 1, 0.95);
-    this.dirLight.position.set(-1, 1.75, 1);
+    this.dirLight.position.set(-1, 1.75, -1.5);
+    this.dirLight.rotation.z = 1;
     this.dirLight.position.multiplyScalar(50);
     this.scene.add(this.dirLight);
     this.dirLight.castShadow = true;
@@ -169,7 +173,8 @@ class Birdsmash extends Component {
 
   // GROUND
   initGround() {
-    this.ground = new Ground().ground;
+    this.groundHolder = new Ground();
+    this.ground = this.groundHolder.ground;
     this.scene.add(this.ground);
   }
 
@@ -220,7 +225,26 @@ class Birdsmash extends Component {
   }
 
   animate = () => {
+    const { game } = this.props;
+    const { flux } = this.context;
+
     this.animationFrame = requestAnimationFrame(this.animate);
+    // switch level
+    if (game.envs.switchNeed) {
+      flux.getActions('game').changeEnvStart();
+      this.setState({ spawner: new Pyramid() });
+      debug('dev')('Switch seems needed, current is ' + game.envs.current);
+      this.groundHolder.setEnv(game.envs.types[game.envs.current]);
+
+      flux.getActions('game').changeEnvEnd();
+
+      // call action that we are switching,
+      // delay,
+      // rotate screen
+      // some effects
+      // continue game
+    }
+    if (game.paused) return;
     this.update();
   }
 
@@ -251,19 +275,19 @@ class Birdsmash extends Component {
       this.mixers[i].update(delta);
     }
     // move trees
-    for (let i = 0; i < this.trees.length; i++) {
-      this.trees[i].position.z += (delta * this.cfg.speed + (game.level * 2));
-      if (this.trees[i].position.z > this.cfg.destroyLine) {
+    for (let i = 0; i < this.obstacles.length; i++) {
+      this.obstacles[i].position.z += (delta * this.cfg.speed + (game.level * 2));
+      if (this.obstacles[i].position.z > this.cfg.destroyLine) {
         // remove the tree and its references
-        this.scene.remove(this.trees[i]);
-        this.trees.splice(i, 1);
-      } else if (this.trees[i].position.z < 45 && this.trees[i].position.z > -20) {
+        this.scene.remove(this.obstacles[i]);
+        this.obstacles.splice(i, 1);
+      } else if (this.obstacles[i].position.z < 45 && this.obstacles[i].position.z > -20) {
         // check for collision
-        if (Math.abs(this.Flamingo.group.position.x - this.trees[i].position.x) < 34) {
+        if (Math.abs(this.Flamingo.group.position.x - this.obstacles[i].position.x) < 34) {
           // COLLIDED!
           debug('dev')('COLLISION DETECTED!');
-          this.scene.remove(this.trees[i]);
-          this.trees.splice(i, 1);
+          this.scene.remove(this.obstacles[i]);
+          this.obstacles.splice(i, 1);
           // reduce lives, if no more lives, game over;
           flux.getActions('game').reduceLives();
 
@@ -292,7 +316,7 @@ class Birdsmash extends Component {
       // update game score
       flux.getActions('game').setScore(howManyTrees);
       while (howManyTrees > 0) {
-        this._createTree();
+        this._createSpawn();
         howManyTrees--;
       }
     }
@@ -337,9 +361,9 @@ class Birdsmash extends Component {
 
   // this will spawn a tree into the scene at random horizontal position for player to avoid
   // tree gets destroyed after it leaves the scene
-  _createTree = () => {
-    const temporaryTree = this.tree.createTree(this.cfg.spawnFar, this.randomize(-500, 500));
-    this.trees.push(temporaryTree);
+  _createSpawn = () => {
+    const temporaryTree = this.state.spawner.createSpawn(this.cfg.spawnFar, this.randomize(-500, 500));
+    this.obstacles.push(temporaryTree);
     this.scene.add(temporaryTree);
   }
 

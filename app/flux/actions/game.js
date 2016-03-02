@@ -4,6 +4,8 @@ class GameActions {
       'initialize',
       'setScore',
       'reduceLives',
+      'changeEnvStart',
+      'changeEnvEnd',
       'end'
     );
   }

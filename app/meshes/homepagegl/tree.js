@@ -33,10 +33,9 @@ export default class Tree {
       vertexColors: THREE.FaceColors,
       shading: THREE.FlatShading });
     this.green = new THREE.Mesh(this.greenGeometry, this.greenMaterial);
-    this.collidable = [];
   }
 
-  createTree(far, positionX) {
+  createSpawn(far, positionX) {
     const temporaryTree = new THREE.Group();
     const cylinder = this.cylinder.clone();
     // ground is positioned on Y axis -30, based on that we put item on the floor with formula

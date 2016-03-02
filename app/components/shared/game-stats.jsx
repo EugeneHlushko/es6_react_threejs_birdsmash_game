@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import connect from 'connect-alt';
-import debug from 'debug';
 
 if (process.env.BROWSER) require('styles/game-stats.scss');
 
@@ -13,8 +12,6 @@ class GameStats extends Component {
 
   render() {
     const { game } = this.props;
-
-    debug('dev')('game is playing? header: ', game);
 
     return (
       <div className='gamestats'>
