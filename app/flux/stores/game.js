@@ -12,7 +12,7 @@ class GameStore {
     this.health = 3;
     this.score = 0;
     this.level = 1;
-    this.levelSwitchCount = 10;
+    this.levelSwitchCount = 16;
     this.paused = false;
     this.gameOver = false;
     this.isPlaying = true;
@@ -38,7 +38,7 @@ class GameStore {
   }
 
   onChangeEnvEnd() {
-    debug('dev')('Game environment has changed! Unpausing');
+    debug('dev')('Game environment has changed! Unpausing 1');
     this.paused = false;
   }
 
@@ -48,7 +48,8 @@ class GameStore {
     // increase level each 16 ticks
     if ((this.ticks / this.level) > this.levelSwitchCount) {
       this.level++;
-      if (this.level === this.envs.switchMark * (this.level / this.envs.switchMark)) {
+
+      if ((this.level / (this.envs.current + 1)) >= this.envs.switchMark) {
         this.envs.current++;
         this.envs.switchNeed = true;
       }

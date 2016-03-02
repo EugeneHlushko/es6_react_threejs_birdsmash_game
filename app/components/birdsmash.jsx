@@ -233,9 +233,7 @@ class Birdsmash extends Component {
     if (game.envs.switchNeed) {
       flux.getActions('game').changeEnvStart();
       this.setState({ spawner: new Pyramid() });
-      debug('dev')('Switch seems needed, current is ' + game.envs.current);
       this.groundHolder.setEnv(game.envs.types[game.envs.current]);
-
       flux.getActions('game').changeEnvEnd();
 
       // call action that we are switching,
