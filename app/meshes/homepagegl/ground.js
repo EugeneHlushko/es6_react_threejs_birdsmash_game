@@ -10,7 +10,7 @@ class Ground {
     };
 
     for (const [ key ] of Object.entries(this.images)) {
-      let tempUrl = require(`images/textures/ground/${ key }_01.jpg`);
+      let tempUrl = require(`images/textures/ground/${ key }_01.png`);
       tempUrl = tempUrl.substring(tempUrl.indexOf('/assets/'));
       this.images[key].url = tempUrl;
     }
